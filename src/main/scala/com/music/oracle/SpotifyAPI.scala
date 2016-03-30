@@ -1,18 +1,19 @@
 package com.music.oracle
 
-import org.slf4j.LoggerFactory
+import java.awt.Desktop
+import java.net.URI
 
-import scala.util.{Failure, Try}
+import com.typesafe.scalalogging.LazyLogging
+
+import scala.util.{Failure, Success, Try}
 
 /**
 	* Created on 3/29/16.
 	*/
 
-object SpotifyAPI {
-	private val LOGGER = LoggerFactory.getLogger(this.getClass)
+object SpotifyAPI extends LazyLogging {
 
 	private val CLIENT_ID = sys.env.getOrElse("SPOTIFY_CLIENT_ID", "")
-	private val CLIENT_SECRET = sys.env.getOrElse("SPOTIFY_CLIENT_SECRET", "")
 	private val REDIRECT_URI = sys.env.getOrElse("SPOTIFY_REDIRECT_URI", "https://github.com/mses-bly/music-oracle")
 
 
@@ -25,7 +26,7 @@ object SpotifyAPI {
 		* @param scope : Most common scope to avoid issues with reduceLeft
 		* @return
 		*/
-	def buildTokenURL(clientId: String = CLIENT_ID,
+	def buildTokenURI(clientId: String = CLIENT_ID,
 	                  redirectURI: String = REDIRECT_URI,
 	                  scope: Seq[String] = Seq("user-read-private")
 	                 ): Try[String] = {
@@ -42,6 +43,14 @@ object SpotifyAPI {
 		}
 	}
 
-	def getStarredSongs() = ???
-
+	def getUserToken() = {
+		val uri = buildTokenURI() match {
+			case Success(u) => u
+			case Failure(ex) => logger.error(ex.getMessage); ""
+		}
+		if (!uri.isEmpty && Desktop.isDesktopSupported) {
+			//Not very clean, but since this is only a backend app, no way around it.
+			Desktop.getDesktop.browse(new URI(uri))
+		}
+	}
 }
