@@ -1,4 +1,4 @@
-package com.music.oracle
+package com.music.oracle.spotify
 
 import org.scalatest.FunSpec
 

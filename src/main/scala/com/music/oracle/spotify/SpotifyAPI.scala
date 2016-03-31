@@ -1,7 +1,4 @@
-package com.music.oracle
-
-import java.awt.Desktop
-import java.net.URI
+package com.music.oracle.spotify
 
 import com.typesafe.scalalogging.LazyLogging
 
@@ -43,14 +40,26 @@ object SpotifyAPI extends LazyLogging {
 		}
 	}
 
-	def getUserToken() = {
-		val uri = buildTokenURI() match {
-			case Success(u) => u
-			case Failure(ex) => logger.error(ex.getMessage); ""
+	/**
+		* Simple interaction to obtain user token
+		* @return
+		*/
+	def getUserToken(): Try[String] = {
+		buildTokenURI() match {
+			case Success(u) => {
+				println(s"Please use this URL to obtain token: $u")
+				print("Please paste user token: ")
+				Try(io.Source.stdin.getLines().next())
+			}
+			case Failure(ex) => Failure(ex)
 		}
-		if (!uri.isEmpty && Desktop.isDesktopSupported) {
-			//Not very clean, but since this is only a backend app, no way around it.
-			Desktop.getDesktop.browse(new URI(uri))
-		}
+	}
+
+	def getUserStarredSongs() = {
+
+	}
+
+	def main(args: Array[String]) {
+		println(getUserToken().getOrElse("TEST"))
 	}
 }
